@@ -79,6 +79,12 @@ class Route
         return $this->matches;
     }
 
+    /**
+     * Matching curent route
+     *
+     * @param string $path
+     * @return int|false
+     */
     public function match(string $path)
     {
         $pattern = str_replace("/", "\/", $this->path);
@@ -87,6 +93,11 @@ class Route
         return preg_match($pattern, $path, $this->matches);
     }
 
+    /**
+     * Call the route callback
+     *
+     * @return mixed
+     */
     public function call()
     {
         if (!is_null($this->matches)) {

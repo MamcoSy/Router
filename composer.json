@@ -1,0 +1,25 @@
+{
+  "name": "mamco-sy/router",
+  "description": "simple router library",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Mamadou Aly Ay",
+      "email": "mamco.aly.sy@gmail.com"
+    }
+  ],
+  "require": {
+    "phpunit/phpunit": "^9.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "MamcoSy\\Router\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MamcoSy\\Tests\\": "tests/"
+    }
+  }
+}

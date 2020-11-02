@@ -4,12 +4,48 @@ namespace MamcoSy\Router;
 
 class Route
 {
+    /**
+     * Route path
+     *
+     * @var string
+     */
     protected $path;
+
+    /**
+     * Route callback
+     *
+     * @var string|callable
+     */
     protected $callback;
+
+    /**
+     * Route name
+     *
+     * @var string|null
+     */
     protected $name;
+
+    /**
+     * Route matches parameters
+     *
+     * @var array
+     */
     protected $matches;
+
+    /**
+     * Route matches parameters condition
+     *
+     * @var array
+     */
     protected $params;
 
+    /**
+     * Route constructor
+     *
+     * @param string $path
+     * @param string|callable $callback
+     * @param string $name
+     */
     public function __construct(string $path, $callback, string $name = null)
     {
         $this->path     = trim($path, '/');
@@ -19,6 +55,12 @@ class Route
 
     }
 
+    /**
+     * Match a route
+     *
+     * @param string $url
+     * @return bool
+     */
     public function match(string $url)
     {
         $url   = trim($url, '/');
@@ -32,13 +74,26 @@ class Route
         return true;
     }
 
+    /**
+     * Set condition for matches parameters
+     *
+     * @param string $param
+     * @param string $regexCondition
+     * @return self
+     */
     public function with(string $param, string $regexCondition)
     {
         $this->params[$param] = str_replace('(', '(?:', $regexCondition);
         return $this;
     }
 
-    public function paramMatch($matche)
+    /**
+     * Adding condition in matches parameters
+     *
+     * @param array $matche
+     * @return string
+     */
+    public function paramMatch(array $matche)
     {
         if (isset($this->params[$matche[1]])) {
             return '(' . $this->params[$matche[1]] . ')';
@@ -46,6 +101,11 @@ class Route
         return '([^/]+)';
     }
 
+    /**
+     * Call a route
+     *
+     * @return mixed
+     */
     public function call()
     {
         if (is_string($this->callback)) {

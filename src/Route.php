@@ -48,6 +48,11 @@ class Route
 
     public function call()
     {
+        if (is_string($this->callback)) {
+            list($controller, $method) = explode('@', $this->callback);
+            var_dump($controller);
+            return call_user_func_array([new $controller, $method], $this->matches);
+        }
         return call_user_func_array($this->callback, $this->matches);
     }
 }

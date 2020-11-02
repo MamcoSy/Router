@@ -10,10 +10,8 @@ class RouterTest extends TestCase
     public function testGetMethodWithRootPath()
     {
         $router = new Router("/", 'GET');
-        $router->get('/', function () {
-            return 'hello';
-        }, 'home');
-        $this->assertEquals('hello', $router->resolve());
+        $router->get('/', 'MamcoSy\Tests\Fixtures\TestController@index', 'home');
+        $this->assertEquals('test success', $router->resolve());
 
     }
 

@@ -4,112 +4,50 @@ namespace MamcoSy\Router;
 
 class Route
 {
-    /**
-     * Route name
-     *
-     * @var string
-     */
-    private $name;
+    protected $path;
+    protected $callback;
+    protected $name;
+    protected $matches;
+    protected $params;
 
-    /**
-     * Route path
-     *
-     * @var string
-     */
-    private $path;
-
-    /**
-     * callback
-     *
-     * @var array|callable
-     */
-    private $callback;
-
-    /**
-     * matches params
-     *
-     * @var array
-     */
-    private $matches = null;
-
-    public function __construct(string $name, string $path, $callback)
+    public function __construct(string $path, $callback, string $name = null)
     {
-        $this->name     = $name;
-        $this->path     = $path;
+        $this->path     = trim($path, '/');
         $this->callback = $callback;
+        $this->name     = $name;
+        $this->matches  = [];
+
     }
 
-    /**
-     * Get route name
-     *
-     * @return  string
-     */
-    public function getName()
+    public function match(string $url)
     {
-        return $this->name;
+        $url   = trim($url, '/');
+        $path  = preg_replace_callback('#{([\w]+)}#', [$this, 'paramMatch'], $this->path);
+        $regex = "#^$path$#";
+        var_dump($regex);
+        if (!preg_match($regex, $url, $this->matches)) {
+            return false;
+        }
+        array_shift($this->matches);
+        return true;
     }
 
-    /**
-     * Get route path
-     *
-     * @return  string
-     */
-    public function getPath()
+    public function with(string $param, string $regexCondition)
     {
-        return $this->path;
+        $this->params[$param] = str_replace('(', '(?:', $regexCondition);
+        return $this;
     }
 
-    /**
-     * Get callback
-     *
-     * @return  array|callable
-     */
-    public function getCallback()
+    public function paramMatch($matche)
     {
-        return $this->callback;
+        if (isset($this->params[$matche[1]])) {
+            return '(' . $this->params[$matche[1]] . ')';
+        }
+        return '([^/]+)';
     }
 
-    /**
-     * Get matches params
-     *
-     * @return  array
-     */
-    public function getMatches()
-    {
-        return $this->matches;
-    }
-
-    /**
-     * Matching curent route
-     *
-     * @param string $path
-     * @return int|false
-     */
-    public function match(string $path)
-    {
-        $pattern = str_replace("/", "\/", $this->path);
-        $pattern = sprintf("/^%s$/", $pattern);
-        $pattern = preg_replace("/(\{\w+\})/", "(.+)", $pattern);
-        return preg_match($pattern, $path, $this->matches);
-    }
-
-    /**
-     * Call the route callback
-     *
-     * @return mixed
-     */
     public function call()
     {
-        if (!is_null($this->matches)) {
-            array_shift($this->matches);
-            if (is_array($this->callback)) {
-                return call_user_func_array(
-                    [new $this->callback[0], $this->callback[1]],
-                    $this->matches
-                );
-            }
-            return call_user_func_array($this->callback, $this->matches);
-        }
-        throw new RouteNotFoundException();
+        return call_user_func_array($this->callback, $this->matches);
     }
 }

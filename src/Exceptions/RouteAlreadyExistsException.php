@@ -1,6 +1,6 @@
 <?php
 
-namespace MamcoSy\Router;
+namespace MamcoSy\Router\Exceptions;
 
 use Exception;
 

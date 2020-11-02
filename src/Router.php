@@ -2,75 +2,53 @@
 
 namespace MamcoSy\Router;
 
+use MamcoSy\Router\Exceptions\RouteNotFoundException;
+use MamcoSy\Router\Exceptions\RouterMethodNotFoundException;
+
 class Router
 {
+    protected $url;
+    protected $method;
+    protected $routes;
 
-    /**
-     * Collection of routes
-     *
-     * @var Route[]
-     */
-    public $routeCollection = [];
-
-    public function getRouteCollection()
+    public function __construct(string $url, string $method)
     {
-        return $this->routeCollection;
+        $this->url    = trim($url);
+        $this->method = $method;
     }
 
-    /**
-     * Adding new route in route collection
-     *
-     * @param Route $route
-     * @return void
-     */
-    public function add(Route $route)
+    public function get(string $path, $callback, string $name = null)
     {
-        if ($this->has($route->getName())) {
-            throw new RouteAlreadyExistsException();
+        $route                 = new Route($path, $callback, $name);
+        $this->routes['GET'][] = $route;
+        return $route;
+    }
+
+    public function post(string $path, $callback, string $name)
+    {
+        $route                  = new Route($path, $callback, $name);
+        $this->routes['POST'][] = $route;
+        return $route;
+    }
+
+    public function any(string $path, $callback, string $name)
+    {
+        $route                  = new Route($path, $callback, $name);
+        $this->routes['GET'][]  = $route;
+        $this->routes['POST'][] = $route;
+        return $route;
+    }
+
+    public function resolve()
+    {
+        if (!isset($this->routes[$this->method])) {
+            throw new RouterMethodNotFoundException();
         }
-
-        $this->routeCollection[$route->getName()] = $route;
-    }
-
-    /**
-     * get a route by his name
-     *
-     * @param string $name
-     * @return Route
-     */
-    public function get(string $name): Route
-    {
-        if ($this->has($name)) {
-            return $this->routeCollection[$name];
-        }
-        throw new RouteNotFoundException();
-    }
-
-    /**
-     * cheking if route exist in route colletion
-     *
-     * @param string $name
-     * @return boolean
-     */
-    public function has(string $name): bool
-    {
-        return isset($this->routeCollection[$name]);
-    }
-
-    /**
-     * Match route with a path
-     *
-     * @param string $path
-     * @return mixed
-     */
-    public function match(string $path)
-    {
-        foreach ($this->routeCollection as $route) {
-            if ($route->match($path)) {
+        foreach ($this->routes[$this->method] as $route) {
+            if ($route->match($this->url)) {
                 return $route->call();
             }
         }
         throw new RouteNotFoundException();
-
     }
 }

@@ -2,68 +2,59 @@
 
 namespace MamcoSy\Tests;
 
-use MamcoSy\Router\Route;
-use MamcoSy\Router\RouteAlreadyExistsException;
-use MamcoSy\Router\RouteNotFoundException;
 use MamcoSy\Router\Router;
-use MamcoSy\Tests\Fixtures\TestController;
 use PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase
 {
-    public function test()
+    public function testGetMethodWithRootPath()
     {
-        $router = new Router();
-        $route  = new Route("home", "/", function () {
-            return "salut";
-        });
-
-        $router->add($route);
-        $this->assertCount(1, $router->getRouteCollection());
-        $this->assertEquals($route, $router->get('home'));
+        $router = new Router("/", 'GET');
+        $router->get('/', function () {
+            return 'hello';
+        }, 'home');
+        $this->assertEquals('hello', $router->resolve());
 
     }
 
-    public function testRouteAlreadyExists()
+    public function testGetMethodWithPostsPath()
     {
-        $router = new Router();
-        $route1 = new Route("home", "/", function () {
-            return "salut";
-        });
-        $route2 = new Route("home", "/", function () {
-            return "salut";
+        $router = new Router("/posts", 'GET');
+        $router->get('/posts', function () {
+            return 'all posts';
         });
 
-        $router->add($route1);
-
-        $this->expectException(RouteAlreadyExistsException::class);
-        $router->add($route2);
-
+        $this->assertEquals('all posts', $router->resolve());
     }
 
-    public function testIfRouteNotFound()
+    public function testGetMethodWithPostId()
     {
-        $router = new Router();
-        $this->expectException(RouteNotFoundException::class);
-        $router->get('dfdf');
-
-    }
-
-    public function testMatcheRoute()
-    {
-        $router = new Router();
-
-        $route = new Route("blog", "/blog/{id}/{slug}", function (int $id, string $slug) {
-            return "blog";
+        $router = new Router("/post/1", 'GET');
+        $router->get('/post/{id}', function (int $id) {
+            return 'posts number ' . $id;
         });
 
-        $route2 = new Route("home", "/", [TestController::class, 'index']);
+        $this->assertEquals('posts number 1', $router->resolve());
+    }
 
-        $router->add($route);
-        $router->add($route2);
+    public function testGetMethodWithSlugAndId()
+    {
+        $router = new Router("/post/mon-article-1", 'GET');
+        $router->get('/post/{slug}-{id}', function ($slug, $id) {
+            return 'slug ' . $slug . ' for id ' . $id;
+        });
 
-        $this->assertEquals($router->match('/'), 'test success');
-        $this->assertEquals($router->match('/blog/45/mon-alticle'), 'blog');
+        $this->assertEquals('slug mon-article for id 1', $router->resolve());
+    }
 
+    public function testGetMethodWithSlugAndIdInversed()
+    {
+        $router = new Router("/post/1-mon-article", 'GET');
+        $router->get('/post/{id}-{slug}', function ($id, $slug) {
+            return 'slug ' . $slug . ' for id ' . $id;
+
+        })->with('id', '[0-9]+')->with('slug', '[a-z\-0-9]+');
+
+        $this->assertEquals('slug mon-article for id 1', $router->resolve());
     }
 }

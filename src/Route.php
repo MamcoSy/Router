@@ -42,62 +42,65 @@ class Route
     /**
      * Route constructor
      *
-     * @param string $path
+     * @param string          $path
      * @param string|callable $callback
-     * @param string $name
+     * @param string          $name
      */
-    public function __construct(string $path, $callback, string $name = null)
+    public function __construct( string $path, $callback, string $name = null )
     {
-        $this->path     = trim($path, '/');
+        $this->path     = trim( $path, '/' );
         $this->callback = $callback;
         $this->name     = $name;
         $this->matches  = [];
-
     }
 
     /**
      * Match a route
      *
-     * @param string $url
+     * @param  string $url
      * @return bool
      */
-    public function match(string $url)
+    public function match( string $url )
     {
-        $url   = trim($url, '/');
-        $path  = preg_replace_callback('#{([\w]+)}#', [$this, 'paramMatch'], $this->path);
+        $url   = trim( $url, '/' );
+        $path  = preg_replace_callback( '#{([\w]+)}#', [$this, 'paramMatch'], $this->path );
         $regex = "#^$path$#";
-        var_dump($regex);
-        if (!preg_match($regex, $url, $this->matches)) {
+        var_dump( $regex );
+
+        if ( !preg_match( $regex, $url, $this->matches ) ) {
             return false;
         }
-        array_shift($this->matches);
+
+        array_shift( $this->matches );
         return true;
     }
 
     /**
      * Set condition for matches parameters
      *
-     * @param string $param
-     * @param string $regexCondition
+     * @param  string $param
+     * @param  string $regexCondition
      * @return self
      */
-    public function with(string $param, string $regexCondition)
+    public function with( string $param, string $regexCondition )
     {
-        $this->params[$param] = str_replace('(', '(?:', $regexCondition);
+        $this->params[$param] = str_replace( '(', '(?:', $regexCondition );
         return $this;
     }
 
     /**
      * Adding condition in matches parameters
      *
-     * @param array $matche
+     * @param  array    $matche
      * @return string
      */
-    public function paramMatch(array $matche)
+    public function paramMatch( array $matche )
     {
-        if (isset($this->params[$matche[1]])) {
+
+        if ( isset( $this->params[$matche[1]] ) ) {
             return '(' . $this->params[$matche[1]] . ')';
         }
+
         return '([^/]+)';
     }
 
@@ -108,11 +111,14 @@ class Route
      */
     public function call()
     {
-        if (is_string($this->callback)) {
-            list($controller, $method) = explode('@', $this->callback);
-            var_dump($controller);
-            return call_user_func_array([new $controller, $method], $this->matches);
+
+        if ( is_string( $this->callback ) ) {
+            list( $controller, $method ) = explode( '@', $this->callback );
+            var_dump( $controller );
+            return call_user_func_array( [new $controller, $method], $this->matches );
         }
-        return call_user_func_array($this->callback, $this->matches);
+
+        return call_user_func_array( $this->callback, $this->matches );
     }
+
 }

@@ -12,6 +12,7 @@ class Router
      *
      * @var string
      */
+
     protected $url;
     /**
      * Request method
@@ -33,23 +34,23 @@ class Router
      * @param string $url
      * @param string $method
      */
-    public function __construct(string $url, string $method)
+    public function __construct( string $url, string $method )
     {
-        $this->url    = trim($url);
+        $this->url    = trim( $url );
         $this->method = $method;
     }
 
     /**
      * Router get Method
      *
-     * @param string $path
-     * @param string|callable $callback
-     * @param string $name
+     * @param  string          $path
+     * @param  string|callable $callback
+     * @param  string          $name
      * @return Route
      */
-    public function get(string $path, $callback, string $name = null)
+    public function get( string $path, $callback, string $name = null )
     {
-        $route                          = new Route($path, $callback, $name);
+        $route                          = new Route( $path, $callback, $name );
         $this->routeCollection['GET'][] = $route;
         return $route;
     }
@@ -57,14 +58,14 @@ class Router
     /**
      * Router post Method
      *
-     * @param string $path
-     * @param string|callable $callback
-     * @param string $name
+     * @param  string          $path
+     * @param  string|callable $callback
+     * @param  string          $name
      * @return Route
      */
-    public function post(string $path, $callback, string $name)
+    public function post( string $path, $callback, string $name )
     {
-        $route                           = new Route($path, $callback, $name);
+        $route                           = new Route( $path, $callback, $name );
         $this->routeCollection['POST'][] = $route;
         return $route;
     }
@@ -72,14 +73,14 @@ class Router
     /**
      * Router post and get Method
      *
-     * @param string $path
-     * @param string|callable $callback
-     * @param string $name
+     * @param  string          $path
+     * @param  string|callable $callback
+     * @param  string          $name
      * @return Route
      */
-    public function any(string $path, $callback, string $name)
+    public function any( string $path, $callback, string $name )
     {
-        $route                           = new Route($path, $callback, $name);
+        $route                           = new Route( $path, $callback, $name );
         $this->routeCollection['GET'][]  = $route;
         $this->routeCollection['POST'][] = $route;
         return $route;
@@ -92,14 +93,20 @@ class Router
      */
     public function resolve()
     {
-        if (!isset($this->routeCollection[$this->method])) {
+
+        if ( !isset( $this->routeCollection[$this->method] ) ) {
             throw new RouterMethodNotFoundException();
         }
-        foreach ($this->routeCollection[$this->method] as $route) {
-            if ($route->match($this->url)) {
+
+        foreach ( $this->routeCollection[$this->method] as $route ) {
+
+            if ( $route->match( $this->url ) ) {
                 return $route->call();
             }
+
         }
+
         throw new RouteNotFoundException();
     }
+
 }
